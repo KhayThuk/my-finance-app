@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกรายรับ-รายจ่าย</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Kanit', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-slate-800 mb-6">📝 บันทึกรายรับ-รายจ่าย</h1>
+        
+        <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
+            <button id="btn-income" onclick="switchType('รายรับ')" class="flex-1 py-2 text-center font-medium rounded-lg bg-white text-emerald-600 shadow-sm transition-all cursor-pointer">
+                💰 รายรับ (กำไร)
+            </button>
+            <button id="btn-expense" onclick="switchType('รายจ่าย')" class="flex-1 py-2 text-center font-medium rounded-lg text-slate-600 transition-all cursor-pointer">
+                📉 รายจ่าย
+            </button>
+        </div>
+
+        <form id="finance-form" onsubmit="handleSubmit(event)" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">หมวดหมู่</label>
+                <select id="category" required class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </select>
+            </div>
+
+            <div>
+                <label id="amount-label" class="block text-sm font-medium text-slate-700 mb-1">จำนวนเงินกำไร (บาท)</label>
+                <input type="number" id="amount" step="0.01" required min="0.01" placeholder="0.00" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-md cursor-pointer shadow-emerald-100">
+                บันทึกรายการ
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // ใส่ URL ของ Google Apps Script ที่ก๊อปปี้มาตรงนี้
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxUJP9h23dHFg8tbW8iPQQgMd9thSYoCVU3R1kwh0MmbpRAkVYLveTSz-9AKhaAiIXtyg/exec";
+
+        let currentType = 'รายรับ';
+
+        const categories = {
+            'รายรับ': ['Netflix', 'iQIYI', 'WeTV', 'YouTube', 'รายการอื่นๆ'],
+            'รายจ่าย': ['โอนค่าสั่งข้าว', 'เติมเงินซื้อของเข้าร้าน']
+        };
+
+        function updateDropdown() {
+            const select = document.getElementById('category');
+            const label = document.getElementById('amount-label');
+            const submitBtn = document.getElementById('submit-btn');
+            
+            select.innerHTML = '';
+            
+            // เพิ่มหมวดหมู่ลง Dropdown
+            categories[currentType].forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+
+            // เปลี่ยนสีและข้อความตามประเภท
+            if (currentType === 'รายรับ') {
+                label.textContent = 'จำนวนเงินกำไร (บาท)';
+                submitBtn.className = "w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-md cursor-pointer shadow-emerald-100";
+            } else {
+                label.textContent = 'จำนวนเงินที่จ่าย (บาท)';
+                submitBtn.className = "w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-xl transition-colors shadow-md cursor-pointer shadow-rose-100";
+            }
+        }
+
+        function switchType(type) {
+            currentType = type;
+            const btnIncome = document.getElementById('btn-income');
+            const btnExpense = document.getElementById('btn-expense');
+
+            if (type === 'รายรับ') {
+                btnIncome.className = "flex-1 py-2 text-center font-medium rounded-lg bg-white text-emerald-600 shadow-sm transition-all cursor-pointer";
+                btnExpense.className = "flex-1 py-2 text-center font-medium rounded-lg text-slate-600 transition-all cursor-pointer";
+            } else {
+                btnIncome.className = "flex-1 py-2 text-center font-medium rounded-lg text-slate-600 transition-all cursor-pointer";
+                btnExpense.className = "flex-1 py-2 text-center font-medium rounded-lg bg-white text-rose-600 shadow-sm transition-all cursor-pointer";
+            }
+            updateDropdown();
+        }
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const submitBtn = document.getElementById('submit-btn');
+            
+            const data = {
+                type: currentType,
+                category: document.getElementById('category').value,
+                amount: document.getElementById('amount').value
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'กำลังบันทึก...';
+
+            try {
+                // ส่งข้อมูลไปที่ Google Apps Script แบบ No-Cors เพื่อเลี่ยงปัญหาด่านตรวจเว็บต่างโดเมน
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
+                document.getElementById('amount').value = '';
+                
+            } catch (error) {
+                console.error(error);
+                alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            } finally {
+                submitBtn.disabled = false;
+                updateDropdown();
+            }
+        }
+
+        // เริ่มต้นโหลด Dropdown ครั้งแรก
+        updateDropdown();
+    </script>
+</body>
+</html>
