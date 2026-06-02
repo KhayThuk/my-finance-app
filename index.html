@@ -14,8 +14,8 @@
         <h1 class="text-2xl font-bold text-center text-slate-800 mb-6">📝 บันทึกรายรับ-รายจ่าย</h1>
         
         <div class="flex bg-slate-100 p-1 rounded-xl mb-6">
-            <button id="btn-income" onclick="switchType('รายรับ')" class="flex-1 py-2 text-center font-medium rounded-lg bg-white text-emerald-600 shadow-sm transition-all cursor-pointer">💰 รายรับ</button>
-            <button id="btn-expense" onclick="switchType('รายจ่าย')" class="flex-1 py-2 text-center font-medium rounded-lg text-slate-600 transition-all cursor-pointer">📉 รายจ่าย</button>
+            <button id="btn-income" type="button" onclick="switchType('รายรับ')" class="flex-1 py-2 text-center font-medium rounded-lg bg-white text-emerald-600 shadow-sm transition-all cursor-pointer">💰 รายรับ</button>
+            <button id="btn-expense" type="button" onclick="switchType('รายจ่าย')" class="flex-1 py-2 text-center font-medium rounded-lg text-slate-600 transition-all cursor-pointer">📉 รายจ่าย</button>
         </div>
 
         <form id="finance-form" onsubmit="handleSubmit(event)" class="space-y-4">
@@ -40,13 +40,13 @@
                 <input type="number" id="amount" step="0.01" required min="0.01" placeholder="0.00" class="w-full p-3 bg-slate-100 border border-slate-200 rounded-xl focus:outline-none font-semibold text-emerald-600">
             </div>
 
-            <button type="submit" id="submit-btn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-md cursor-pointer shadow-emerald-100">บันทึกรายการ</button>
+            <button type="submit" id="submit-btn" class="w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors shadow-md cursor-pointer">บันทึกรายการ</button>
         </form>
     </div>
 
     <script>
-        // นำ URL ของ Apps Script ที่ได้จากขั้นตอนที่ 2 มาวางตรงนี้แทนได้เลยครับ
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxg_uHPc0Gy_RuuVA3A62NNVn2Hk7gio3vCfBHoG0NsKTYvYoBeruT9dORqOQSR8f-FgA/exec";
+        // อย่าลืมเอาลิงก์ URL เว็บแอปใหม่จากขั้นตอนที่ 1 มาวางตรงนี้แทนนะครับ
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxRdjSCRfecMb3oRYLQIOVAksjlEke3ghL5FurUjjNGY3s7osqMx0GpCZSSJY90NHZgvQ/exec";
         
         let currentType = 'รายรับ';
         const categories = {
@@ -88,7 +88,7 @@
                 calcFields.style.display = 'grid';
                 document.getElementById('sale-price').required = true;
                 document.getElementById('cost-price').required = true;
-                submitBtn.className = "w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors cursor-pointer shadow-md shadow-emerald-100";
+                submitBtn.className = "w-full py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-xl transition-colors cursor-pointer shadow-md";
             } else {
                 label.textContent = 'จำนวนเงินที่จ่าย (บาท)';
                 amountInput.readOnly = false;
@@ -98,7 +98,7 @@
                 document.getElementById('cost-price').required = false;
                 document.getElementById('sale-price').value = '';
                 document.getElementById('cost-price').value = '';
-                submitBtn.className = "w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-xl transition-colors cursor-pointer shadow-md shadow-rose-100";
+                submitBtn.className = "w-full py-3.5 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-xl transition-colors cursor-pointer shadow-md";
             }
             amountInput.value = '';
         }
@@ -121,6 +121,7 @@
             event.preventDefault();
             const submitBtn = document.getElementById('submit-btn');
             
+            // ตรวจสอบชื่อตัวแปรให้สะกดตรงกันกับใน Google Apps Script 
             const data = {
                 type: currentType,
                 category: document.getElementById('category').value,
@@ -140,9 +141,9 @@
                     body: JSON.stringify(data)
                 });
                 alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
-                document.getElementById('amount').value = '';
                 document.getElementById('sale-price').value = '';
                 document.getElementById('cost-price').value = '';
+                document.getElementById('amount').value = '';
             } catch (error) {
                 alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             } finally {
